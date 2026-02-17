@@ -6,10 +6,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+
 #%% define drug models
 
 # define toxicity levels for each drug (lambda)
-metformin_lambda = 0.5
+metformin_lambda = 0.5 # initially 0.5, 0.8, 0.3
 
 lisinopril_lambda = 0.8
 
@@ -27,6 +28,10 @@ def escitalopram(x):  # weaker efficacy, low toxicity
     efficacy = 0.6 * np.exp(-0.1*(x-4)**2)
     toxicity = 0.1 * x**2 / 120
     return efficacy - escitalopram_lambda * toxicity
+def combined(x): 
+    efficacy = 
+    toxicity = 
+    return efficacy - 
 
 #%% plot drug efficacies
 x = np.linspace(0, 15, 100)
@@ -34,10 +39,12 @@ fig, ax = plt.subplots(figsize=(10, 6))
 plt.plot(x, metformin(x), label='Metformin', color='blue')
 plt.plot(x, lisinopril(x), label='Lisinopril', color='orange')
 plt.plot(x, escitalopram(x), label='Escitalopram', color='green')
+plt.plot(x, metformin(x) + escitalopram(x) + lisinopril(x), label='Combined Effect', color='red', linestyle= 'dashed')
 plt.title('Drug Efficacy vs Dosage')
 plt.xlabel('Dosage (mg)')
 plt.ylabel('Net Effect')
 plt.legend()
+plt.show()
 
 # %% Find optimal dosages for each drug
 
@@ -48,7 +55,7 @@ def gradient(f, x, h=1e-4):
     """Central difference approximation for f'(x)."""
     return (f(x + h) - f(x - h)) / (2*h)
 
-def steepest_ascent(f, x0, h_step=0.1, tol=1e-6, max_iter=1000):
+def steepest_ascent(f, x0, h_step=0.1, tol=1e-6, max_iter=1000): # initailly 1000
     x = x0 # update initial guess
     for i in range(max_iter):
         grad = gradient(f, x)
@@ -75,6 +82,9 @@ print(f"Steepest Ascent Method - Optimal Lisinopril Effect: {opt_effect_lisinopr
 opt_dose_escitalopram, opt_effect_escitalopram = steepest_ascent(escitalopram, x0=1.0)
 print(f"Steepest Ascent Method - Optimal Escitalopram Dose: {opt_dose_escitalopram:.2f} mg")
 print(f"Steepest Ascent Method - Optimal Escitalopram Effect: {opt_effect_escitalopram*100:.2f}%")
+
+# Combined Dosage 
+opt_dose_combined, opt_effect_combined = steepest_ascent(combined, x0=1.0)
 
 # %% Newton's method
 
