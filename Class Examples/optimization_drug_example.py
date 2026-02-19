@@ -1,7 +1,7 @@
 # drug efficacy optimization example for BME 2315
 # made by Lavie, fall 2025
 
-#%% import libraries
+#%% impo-rt libraries
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -28,22 +28,8 @@ def escitalopram(x):  # weaker efficacy, low toxicity
     toxicity = 0.1 * x**2 / 120
     return efficacy - escitalopram_lambda * toxicity
 
-
-
-#%% plot drug efficacies
-x = np.linspace(0, 15, 100)
-fig, ax = plt.subplots(figsize=(10, 6))
-plt.plot(x, metformin(x), label='Metformin', color='blue')
-plt.plot(x, lisinopril(x), label='Lisinopril', color='orange')
-plt.plot(x, escitalopram(x), label='Escitalopram', color='green')
-plt.plot(x, escitalopram(x) + lisinopril(x) + metformin(x), label='Combined Effect', color='red', linestyle = 'dashed')
-
-plt.title('Drug Efficacy vs Dosage')
-plt.xlabel('Dosage (mg)')
-plt.ylabel('Net Effect')
-plt.legend()
-plt.show()
-
+def combined_effect(x):
+    return metformin(x) + lisinopril(x) + escitalopram(x)
 
 # %% Find optimal dosages for each drug
 
@@ -58,7 +44,9 @@ def steepest_ascent(f, x0, h_step=0.1, tol=1e-6, max_iter=100):
     x = x0 # update initial guess
     for i in range(max_iter):
         grad = gradient(f, x)
-        x_new = x + h_step * grad     
+        x_new = x + h_step * grad 
+        x_new = np.clip(x_new, 0, 15)
+    
         
         if abs(x_new - x) < tol:      # convergence condition, when solution is 0
             print(f"Converged in {i+1} iterations.")
@@ -82,6 +70,13 @@ opt_dose_escitalopram, opt_effect_escitalopram = steepest_ascent(escitalopram, x
 print(f"Steepest Ascent Method - Optimal Escitalopram Dose: {opt_dose_escitalopram:.2f} mg")
 print(f"Steepest Ascent Method - Optimal Escitalopram Effect: {opt_effect_escitalopram*100:.2f}%")
 
+# combined effect
+opt_dose_combined, opt_effect_combined = steepest_ascent(combined_effect, x0=5)
+print(f"Steepest Ascent - Optimal Combined Dose: {opt_dose_combined:.2f} mg")
+print(f"Steepest Ascent - Optimal Combined Effect: {opt_effect_combined:.3f}")
+
+
+
 # %% Newton's method
 
 # requires second derivative
@@ -100,6 +95,8 @@ def newtons_method(f, x0, tol=1e-6, max_iter=1000):
             return x, f(x)
         
         x_new = x - grad / hess
+        x_new = np.clip(x_new, 0, 15)
+
         
         if abs(x_new - x) < tol:
             print(f"Converged in {i+1} iterations.")
@@ -122,3 +119,25 @@ print(f"Newton's Method - Optimal Lisinopril Effect: {opt_effect_lisinopril_nm*1
 opt_dose_escitalopram_nm, opt_effect_escitalopram_nm = newtons_method(escitalopram, x0=1.0)
 print(f"Newton's Method - Optimal Escitalopram Dose: {opt_dose_escitalopram_nm:.2f} mg")
 print(f"Newton's Method - Optimal Escitalopram Effect: {opt_effect_escitalopram_nm*100:.2f}%")
+
+# combined effect
+opt_dose_combined_nm, opt_effect_combined_nm = newtons_method(combined_effect, x0=5)
+print(f"Newton - Optimal Combined Dose: {opt_dose_combined_nm:.2f} mg")
+print(f"Newton - Optimal Combined Effect: {opt_effect_combined_nm:.3f}")
+
+
+#%% plot drug efficacies
+x = np.linspace(0, 15, 100)
+fig, ax = plt.subplots(figsize=(10, 6))
+plt.plot(x, metformin(x), label='Metformin', color='blue')
+plt.plot(x, lisinopril(x), label='Lisinopril', color='orange')
+plt.plot(x, escitalopram(x), label='Escitalopram', color='green')
+plt.plot(x, combined_effect(x), label='Combined Effect', color='red', linestyle = 'dashed')
+
+plt.title('Drug Efficacy vs Dosage')
+plt.xlabel('Dosage (mg)')
+plt.ylabel('Net Effect')
+plt.legend()
+plt.axvline(opt_dose_combined_nm, linestyle=':', linewidth=2, label="Combined optimum (Newton)")
+plt.scatter(opt_dose_combined_nm, combined_effect(opt_dose_combined_nm), s=80)
+plt.show()
