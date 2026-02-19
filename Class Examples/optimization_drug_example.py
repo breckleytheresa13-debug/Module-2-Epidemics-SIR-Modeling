@@ -56,17 +56,17 @@ def steepest_ascent(f, x0, h_step=0.1, tol=1e-6, max_iter=100):
     return x, f(x)
 
 # metformin
-opt_dose_metformin, opt_effect_metformin = steepest_ascent(metformin, x0=1.0)
+opt_dose_metformin, opt_effect_metformin = steepest_ascent(metformin, x0=5.0)
 print(f"Steepest Ascent Method - Optimal Metformin Dose: {opt_dose_metformin:.2f} mg")
 print(f"Steepest Ascent Method - Optimal Metformin Effect: {opt_effect_metformin*100:.2f}%")
 
 # lisinopril
-opt_dose_lisinopril, opt_effect_lisinopril = steepest_ascent(lisinopril, x0=1.0)
+opt_dose_lisinopril, opt_effect_lisinopril = steepest_ascent(lisinopril, x0=7.0)
 print(f"Steepest Ascent Method - Optimal Lisinopril Dose: {opt_dose_lisinopril:.2f} mg")
 print(f"Steepest Ascent Method - Optimal Lisinopril Effect: {opt_effect_lisinopril*100:.2f}%")
 
 # escitalopram
-opt_dose_escitalopram, opt_effect_escitalopram = steepest_ascent(escitalopram, x0=1.0)
+opt_dose_escitalopram, opt_effect_escitalopram = steepest_ascent(escitalopram, x0=4.0)
 print(f"Steepest Ascent Method - Optimal Escitalopram Dose: {opt_dose_escitalopram:.2f} mg")
 print(f"Steepest Ascent Method - Optimal Escitalopram Effect: {opt_effect_escitalopram*100:.2f}%")
 
