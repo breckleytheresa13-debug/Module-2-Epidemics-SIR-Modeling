@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import csv
 
 days = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
         21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45]
@@ -15,8 +16,26 @@ r, log_a = coeffs
 a = np.exp(log_a)
 fit_line = a * np.exp(r * np.array(days))
 
+# Graph that I made
+
+days = []
+cases = []
+
+with open("/Users/tomas/CompBME/Breckley_Daniel - Module_2_Epidemics_SIR_Modeling/Module-2-Epidemics-SIR-Modeling/Data/mystery_virus_daily_active_counts_RELEASE#1.csv") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        days.append(int(row["day"]))
+        cases.append(int(row["active reported daily cases"]))
+
+plt.plot(days, cases)
+plt.xlabel("# of Days")
+plt.ylabel("Active Infections")
+plt.title("Mystery Virus - Active Infections")
+plt.show()
+
 # NEEDED AI TO HELP ME CREATE THIS PLOT
-# WANTED AN EXPONENTIAL AND IT DID IT BETTER THAN MY INITIAL ATTEMPTS
+# WANTED AN EXPONENTIAL AND IT DID IT BETTER THAN MY OWN
+# IT'S MUCH NICER TOO 
 
 fig, ax = plt.subplots(figsize=(12, 6))
 fig.patch.set_facecolor('#0a0d0f')
