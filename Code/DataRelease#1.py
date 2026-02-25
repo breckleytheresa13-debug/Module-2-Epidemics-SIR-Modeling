@@ -2,20 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
-days = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
-        21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45]
-
-cases = [1,1,1,1,1,1,2,2,2,3,3,4,4,4,5,6,7,9,9,10,
-         13,14,16,17,20,24,25,31,33,38,43,54,56,60,75,76,93,94,110,134,155,170,189,211,223]
-
-
-fit_days = np.array(days[19:])
-fit_cases = np.array(cases[19:])
-coeffs = np.polyfit(fit_days, np.log(fit_cases), 1)
-r, log_a = coeffs
-a = np.exp(log_a)
-fit_line = a * np.exp(r * np.array(days))
-
 # Graph that I made
 
 days = []
@@ -34,8 +20,24 @@ plt.title("Mystery Virus - Active Infections")
 plt.show()
 
 # NEEDED AI TO HELP ME CREATE THIS PLOT
-# WANTED AN EXPONENTIAL AND IT DID IT BETTER THAN MY OWN
-# IT'S MUCH NICER TOO 
+# WANTED A NICER GRAPH AND IT MADE EVERYTHING BELOW
+
+
+
+days = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+        21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45]
+
+cases = [1,1,1,1,1,1,2,2,2,3,3,4,4,4,5,6,7,9,9,10,
+         13,14,16,17,20,24,25,31,33,38,43,54,56,60,75,76,93,94,110,134,155,170,189,211,223]
+
+
+fit_days = np.array(days[19:])
+fit_cases = np.array(cases[19:])
+coeffs = np.polyfit(fit_days, np.log(fit_cases), 1)
+r, log_a = coeffs
+a = np.exp(log_a)
+fit_line = a * np.exp(r * np.array(days))
+
 
 fig, ax = plt.subplots(figsize=(12, 6))
 fig.patch.set_facecolor('#0a0d0f')
