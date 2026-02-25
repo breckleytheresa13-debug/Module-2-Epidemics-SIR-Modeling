@@ -28,10 +28,6 @@ def escitalopram(x):  # weaker efficacy, low toxicity
     efficacy = 0.6 * np.exp(-0.1*(x-4)**2)
     toxicity = 0.1 * x**2 / 120
     return efficacy - escitalopram_lambda * toxicity
-def combined(x): 
-    efficacy = 
-    toxicity = 
-    return efficacy - 
 
 #%% plot drug efficacies
 x = np.linspace(0, 15, 100)
