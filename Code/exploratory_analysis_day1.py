@@ -22,3 +22,4 @@ plt.xlabel("# of Days")
 plt.ylabel("Active Infections")
 plt.title("Mystery Virus - Active Infections")
 plt.show()
+
