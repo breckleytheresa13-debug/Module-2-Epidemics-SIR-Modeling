@@ -37,5 +37,26 @@ r = popt[0]
 D = 7
 R0 = 1 + r * D
 
+print(f"Fitted growth rate r: {r:.4f} per day")
+print(f"Doubling time: {np.log(2)/r:.1f} days")
+print(f"Estimated R0 (generation time = {D} days): {R0:.2f}")
+
+fig, ax = plt.subplots(figsize=(10, 6))
+
+ax.scatter(t, y, color='steelblue', zorder=5, label='Active Cases (observed)')
+
+t_smooth = np.linspace(t[0], t[-1], 300)
+y_fit = y[0] * exponential_growth(t_smooth, r)
+ax.plot(t_smooth, y_fit, color='tomato', linewidth=2,
+        label=f'Exponential fit (r={r:.4f}, R0≈{R0:.2f})')
+
+ax.set_xlabel('Day Number')
+ax.set_ylabel('Active Cases')
+ax.set_title('Exponential Growth Fit to Active Cases')
+ax.legend()
+ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
 
 # Add the fit as a line on top of your scatterplot.
