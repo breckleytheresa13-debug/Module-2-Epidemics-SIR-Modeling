@@ -7,7 +7,7 @@ import csv
 days = []
 cases = []
 
-with open("/Users/tomas/CompBME/Breckley_Daniel - Module_2_Epidemics_SIR_Modeling/Module-2-Epidemics-SIR-Modeling/Data/mystery_virus_daily_active_counts_RELEASE#1.csv") as f:
+with open("C:\\Users\\15712\\OneDrive - University of Virginia\\Comp Mod 2\\Module-2-Epidemics-SIR-Modeling\\Data\\mystery_virus_daily_active_counts_RELEASE#1.csv") as f:
     reader = csv.DictReader(f)
     for row in reader:
         days.append(int(row["day"]))
