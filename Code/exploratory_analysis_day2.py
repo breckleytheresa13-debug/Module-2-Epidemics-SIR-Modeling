@@ -7,7 +7,7 @@ from scipy.optimize import curve_fit
 
 #%%
 # Load the data
-data = pd.read_csv('/Users/tomas/CompBME/Module-2-Epidemics-SIR-Modeling/Data/mystery_virus_daily_active_counts_RELEASE#1.csv', parse_dates=['date'], header=0, index_col=None)
+data = pd.read_csv('C:\\Users\\15712\\OneDrive - University of Virginia\\Comp Mod 2\\Module-2-Epidemics-SIR-Modeling\\Data\\mystery_virus_daily_active_counts_RELEASE#1.csv', parse_dates=['date'], header=0, index_col=None)
 
 day_number = data['day']
 active_cases = data['active reported daily cases']
