@@ -273,7 +273,7 @@ for beta in beta_vals:
 
             if sse < best_sse:
                 best_sse = sse
-                best_beta = beta
+                best_beta = 0.6 * beta
                 best_sigma = sigma
                 best_gamma = gamma
                 best_new_cases = new_cases_try
@@ -430,4 +430,6 @@ print("Relative error in peak day (x) =", error_x, "%")
 #==========================================
 ##Intervention Methods
 #==========================================
+
+### Masking
 
