@@ -337,15 +337,78 @@ plt.grid(True)
 plt.show()
 
 # %%
-# Intervention Strategy 1 — Mandated Masking
-# ==========================================
+# Mandated Masking Intervention at Day 70
+# ================================================================
 
-# Masking reduces transmission rate beta by 40% after day 70
-beta_mask = best_beta * 0.6
+# This creates a best-fit SEIR model using Release #3 data
+beta_vals_3 = np.linspace(0.2, 0.8, 15)
+sigma_vals_3 = np.linspace(0.1, 0.4, 15)
+gamma_vals_3 = np.linspace(0.04, 0.15, 15)
+E0_multipliers_3 = [1, 2, 3]
 
-# Custom SEIR model with intervention starting at day 70
-def seir_with_masking(beta, beta_mask, sigma, gamma, S0, E0, I0, R0, timepoints, N):
+# These variables store the best Release #3 fit
+best_sse_3 = np.inf
+best_beta_3 = None
+best_sigma_3 = None
+best_gamma_3 = None
+best_E0_3 = None
+best_I_3 = None
 
+# These are the initial conditions based on Release #3
+I0_3 = active3[0]
+R0_3 = 0
+N_3 = N
+
+# This searches for the best-fit SEIR curve for Release #3
+for E_mult in E0_multipliers_3:
+    E0_try_3 = E_mult * I0_3
+    S0_try_3 = N_3 - E0_try_3 - I0_3 - R0_3
+
+    for beta in beta_vals_3:
+        for sigma in sigma_vals_3:
+            for gamma in gamma_vals_3:
+                S_try_3, E_try_3, I_try_3, R_try_3 = seir_model(
+                    beta, sigma, gamma,
+                    S0_try_3, E0_try_3, I0_3, R0_3,
+                    days3, N_3
+                )
+
+                sse_3 = calculate_sse(active3, I_try_3)
+
+                if sse_3 < best_sse_3:
+                    best_sse_3 = sse_3
+                    best_beta_3 = beta
+                    best_sigma_3 = sigma
+                    best_gamma_3 = gamma
+                    best_E0_3 = E0_try_3
+                    best_I_3 = I_try_3
+
+# This prints the best-fit Release #3 model parameters
+print("Best-fit Release #3 parameters:")
+print("Best beta =", best_beta_3)
+print("Best sigma =", best_sigma_3)
+print("Best gamma =", best_gamma_3)
+print("Best E0 =", best_E0_3)
+print("Lowest SSE =", best_sse_3)
+
+# This rebuilds the starting susceptible population for the Release #3 model
+S0_best_3 = N_3 - best_E0_3 - I0_3 - R0_3
+
+# This creates a longer time range so the intervention curve can be seen clearly
+future_timepoints_3 = np.arange(1, 161, 1)
+
+# This generates the original best-fit Release #3 model with no intervention
+S_base_3, E_base_3, I_base_3, R_base_3 = seir_model(
+    best_beta_3, best_sigma_3, best_gamma_3,
+    S0_best_3, best_E0_3, I0_3, R0_3,
+    future_timepoints_3, N_3
+)
+
+# Masking reduces transmission by 40 percent, so beta becomes 60 percent of its original value
+beta_mask_3 = 0.6 * best_beta_3
+
+# This function applies masking starting at day 70
+def seir_with_masking(beta_before, beta_after, sigma, gamma, S0, E0, I0, R0, timepoints, N):
     dt = timepoints[1] - timepoints[0]
 
     S = np.zeros(len(timepoints))
@@ -358,55 +421,252 @@ def seir_with_masking(beta, beta_mask, sigma, gamma, S0, E0, I0, R0, timepoints,
     I[0] = I0
     R[0] = R0
 
+    # This updates the model one day at a time and switches beta at day 70
     for n in range(len(timepoints) - 1):
-
-        # Switch transmission rate after day 70
         if timepoints[n] >= 70:
-            beta_current = beta_mask
+            beta_current = beta_after
         else:
-            beta_current = beta
+            beta_current = beta_before
 
         dSdt = -beta_current * S[n] * I[n] / N
         dEdt = beta_current * S[n] * I[n] / N - sigma * E[n]
         dIdt = sigma * E[n] - gamma * I[n]
         dRdt = gamma * I[n]
 
-        S[n+1] = S[n] + dSdt * dt
-        E[n+1] = E[n] + dEdt * dt
-        I[n+1] = I[n] + dIdt * dt
-        R[n+1] = R[n] + dRdt * dt
+        S[n + 1] = S[n] + dSdt * dt
+        E[n + 1] = E[n] + dEdt * dt
+        I[n + 1] = I[n] + dIdt * dt
+        R[n + 1] = R[n] + dRdt * dt
 
     return S, E, I, R
 
-
-# Run simulation with masking intervention
-S_mask, E_mask, I_mask, R_mask = seir_with_masking(
-    best_beta, beta_mask, best_sigma, best_gamma,
-    S0_best, best_E0, I0, R0_initial,
-    future_timepoints, N
+# This generates the masking intervention curve based on the Release #3 best-fit model
+S_mask_3, E_mask_3, I_mask_3, R_mask_3 = seir_with_masking(
+    best_beta_3, beta_mask_3, best_sigma_3, best_gamma_3,
+    S0_best_3, best_E0_3, I0_3, R0_3,
+    future_timepoints_3, N_3
 )
 
+# This plots the Release #3 best-fit curve and the masking intervention curve
+plt.figure(figsize=(8, 5))
 
-# Plot comparison: actual outbreak vs masking intervention
-plt.figure(figsize=(8,5))
-
-plt.scatter(days3, active3, color="black", label="Observed Release #3 Data")
-
-plt.plot(future_timepoints, I_future,
-         color="red", linewidth=2,
-         label="Original Model (No Intervention)")
-
-plt.plot(future_timepoints, I_mask,
-         color="blue", linewidth=2,
-         label="Mandated Masking at Day 70")
-
+plt.plot(future_timepoints_3, I_base_3, linewidth=2, label="Release #3 Best-Fit Curve")
+plt.plot(future_timepoints_3, I_mask_3, linewidth=2, label="Mandated Masking at Day 70")
 plt.axvline(70, linestyle="--", color="gray", label="Intervention Start (Day 70)")
 
 plt.xlabel("Day")
 plt.ylabel("Active Cases")
-plt.title("Effect of Mandated Masking on Epidemic Curve")
-
+plt.title("Effect of Mandated Masking on Release #3 Best-Fit Curve")
 plt.legend()
 plt.grid(True)
-
 plt.show()
+
+# %%
+# Vaccine Campaign Intervention
+# ================================================================
+
+# This vaccine campaign moves vaccinated susceptible people into the recovered group on day 70
+vaccinated_students = 2000
+vaccine_efficacy = 0.90
+effective_vaccinated = vaccinated_students * vaccine_efficacy
+
+# This function applies a one-time vaccination event on day 70
+def seir_with_vaccination(beta, sigma, gamma, S0, E0, I0, R0, timepoints, N):
+    dt = timepoints[1] - timepoints[0]
+
+    S = np.zeros(len(timepoints))
+    E = np.zeros(len(timepoints))
+    I = np.zeros(len(timepoints))
+    R = np.zeros(len(timepoints))
+
+    S[0] = S0
+    E[0] = E0
+    I[0] = I0
+    R[0] = R0
+
+    vaccination_applied = False
+
+    # This updates the model one step at a time and applies vaccination once at day 70
+    for n in range(len(timepoints) - 1):
+        dSdt = -beta * S[n] * I[n] / N
+        dEdt = beta * S[n] * I[n] / N - sigma * E[n]
+        dIdt = sigma * E[n] - gamma * I[n]
+        dRdt = gamma * I[n]
+
+        S[n + 1] = S[n] + dSdt * dt
+        E[n + 1] = E[n] + dEdt * dt
+        I[n + 1] = I[n] + dIdt * dt
+        R[n + 1] = R[n] + dRdt * dt
+
+        # This applies the vaccine campaign one time on day 70
+        if timepoints[n + 1] >= 70 and not vaccination_applied:
+            vaccinated_now = min(effective_vaccinated, S[n + 1])
+            S[n + 1] = S[n + 1] - vaccinated_now
+            R[n + 1] = R[n + 1] + vaccinated_now
+            vaccination_applied = True
+
+    return S, E, I, R
+
+# This generates the vaccine intervention curve based on the Release #3 best-fit model
+S_vax_3, E_vax_3, I_vax_3, R_vax_3 = seir_with_vaccination(
+    best_beta_3, best_sigma_3, best_gamma_3,
+    S0_best_3, best_E0_3, I0_3, R0_3,
+    future_timepoints_3, N_3
+)
+
+# This plots the Release #3 best-fit curve and the vaccine intervention curve
+plt.figure(figsize=(8, 5))
+
+plt.plot(future_timepoints_3, I_base_3, linewidth=2, label="Release #3 Best-Fit Curve")
+plt.plot(future_timepoints_3, I_vax_3, linewidth=2, label="Vaccine Campaign at Day 70")
+plt.axvline(70, linestyle="--", color="gray", label="Intervention Start (Day 70)")
+
+plt.xlabel("Day")
+plt.ylabel("Active Cases")
+plt.title("Effect of Vaccine Campaign on Release #3 Best-Fit Curve")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# %%
+# School Closure Intervention
+# ===============================================================
+
+# School closure reduces contact rate to 20 percent of normal for 2 weeks
+beta_closure = 0.2 * best_beta_3
+
+# This function applies a temporary school closure from day 70 to day 83
+def seir_with_school_closure(beta_before, beta_during, sigma, gamma, S0, E0, I0, R0, timepoints, N):
+    dt = timepoints[1] - timepoints[0]
+
+    S = np.zeros(len(timepoints))
+    E = np.zeros(len(timepoints))
+    I = np.zeros(len(timepoints))
+    R = np.zeros(len(timepoints))
+
+    S[0] = S0
+    E[0] = E0
+    I[0] = I0
+    R[0] = R0
+
+    # This updates the model one day at a time and changes beta only during the closure period
+    for n in range(len(timepoints) - 1):
+        if 70 <= timepoints[n] < 84:
+            beta_current = beta_during
+        else:
+            beta_current = beta_before
+
+        dSdt = -beta_current * S[n] * I[n] / N
+        dEdt = beta_current * S[n] * I[n] / N - sigma * E[n]
+        dIdt = sigma * E[n] - gamma * I[n]
+        dRdt = gamma * I[n]
+
+        S[n + 1] = S[n] + dSdt * dt
+        E[n + 1] = E[n] + dEdt * dt
+        I[n + 1] = I[n] + dIdt * dt
+        R[n + 1] = R[n] + dRdt * dt
+
+    return S, E, I, R
+
+# This generates the school closure intervention curve based on the Release #3 best-fit model
+S_close_3, E_close_3, I_close_3, R_close_3 = seir_with_school_closure(
+    best_beta_3, beta_closure, best_sigma_3, best_gamma_3,
+    S0_best_3, best_E0_3, I0_3, R0_3,
+    future_timepoints_3, N_3
+)
+
+# This plots the Release #3 best-fit curve and the school closure intervention curve
+plt.figure(figsize=(8, 5))
+
+plt.plot(future_timepoints_3, I_base_3, linewidth=2, label="Release #3 Best-Fit Curve")
+plt.plot(future_timepoints_3, I_close_3, linewidth=2, label="2-Week School Closure at Day 70")
+plt.axvline(70, linestyle="--", color="gray", label="Closure Starts (Day 70)")
+plt.axvline(84, linestyle=":", color="gray", label="Closure Ends (Day 84)")
+
+plt.xlabel("Day")
+plt.ylabel("Active Cases")
+plt.title("Effect of School Closure on Release #3 Best-Fit Curve")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# %%
+# Combined Intervention - Mandated Masking + Vaccine Campaign + School Closure
+# =======================================
+
+# This combines masking, vaccination, and school closure starting at day 70
+vaccinated_students_combo = 2000
+vaccine_efficacy_combo = 0.90
+effective_vaccinated_combo = vaccinated_students_combo * vaccine_efficacy_combo
+
+# This sets the reduced transmission rates for the intervention periods
+beta_mask_only = 0.6 * best_beta_3
+beta_mask_and_closure = 0.12 * best_beta_3
+
+# This function applies all three interventions together
+def seir_with_combined_intervention(beta_normal, beta_mask_after, beta_mask_closure, sigma, gamma, S0, E0, I0, R0, timepoints, N):
+    dt = timepoints[1] - timepoints[0]
+
+    S = np.zeros(len(timepoints))
+    E = np.zeros(len(timepoints))
+    I = np.zeros(len(timepoints))
+    R = np.zeros(len(timepoints))
+
+    S[0] = S0
+    E[0] = E0
+    I[0] = I0
+    R[0] = R0
+
+    vaccination_applied = False
+
+    # This updates the model one day at a time and applies all interventions starting at day 70
+    for n in range(len(timepoints) - 1):
+        if 70 <= timepoints[n] < 84:
+            beta_current = beta_mask_closure
+        elif timepoints[n] >= 84:
+            beta_current = beta_mask_after
+        else:
+            beta_current = beta_normal
+
+        dSdt = -beta_current * S[n] * I[n] / N
+        dEdt = beta_current * S[n] * I[n] / N - sigma * E[n]
+        dIdt = sigma * E[n] - gamma * I[n]
+        dRdt = gamma * I[n]
+
+        S[n + 1] = S[n] + dSdt * dt
+        E[n + 1] = E[n] + dEdt * dt
+        I[n + 1] = I[n] + dIdt * dt
+        R[n + 1] = R[n] + dRdt * dt
+
+        # This applies the vaccine campaign one time on day 70
+        if timepoints[n + 1] >= 70 and not vaccination_applied:
+            vaccinated_now = min(effective_vaccinated_combo, S[n + 1])
+            S[n + 1] = S[n + 1] - vaccinated_now
+            R[n + 1] = R[n + 1] + vaccinated_now
+            vaccination_applied = True
+
+    return S, E, I, R
+
+# This generates the combined intervention curve based on the Release #3 best-fit model
+S_combo_3, E_combo_3, I_combo_3, R_combo_3 = seir_with_combined_intervention(
+    best_beta_3, beta_mask_only, beta_mask_and_closure,
+    best_sigma_3, best_gamma_3,
+    S0_best_3, best_E0_3, I0_3, R0_3,
+    future_timepoints_3, N_3
+)
+
+# This plots the Release #3 best-fit curve and the combined intervention curve
+plt.figure(figsize=(8, 5))
+
+plt.plot(future_timepoints_3, I_base_3, linewidth=2, label="Release #3 Best-Fit Curve")
+plt.plot(future_timepoints_3, I_combo_3, linewidth=2, label="Combined Intervention at Day 70")
+plt.axvline(70, linestyle="--", color="gray", label="Intervention Start (Day 70)")
+plt.axvline(84, linestyle=":", color="gray", label="School Reopens (Day 84)")
+
+plt.xlabel("Day")
+plt.ylabel("Active Cases")
+plt.title("Effect of Combined Intervention on Release #3 Best-Fit Curve")
+plt.legend()
+plt.grid(True)
+plt.show()
+# %%
