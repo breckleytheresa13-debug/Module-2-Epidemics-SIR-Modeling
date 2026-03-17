@@ -12,7 +12,7 @@ import csv
 days = []
 cases = []
 
-with open("C:\\Users\\15712\\OneDrive - University of Virginia\\Comp Mod 2\\Module-2-Epidemics-SIR-Modeling\\Data\\mystery_virus_daily_active_counts_RELEASE#1.csv") as f:
+with open("/Users/tomas/Desktop/CompBME/Module-2-Epidemics-SIR-Modeling/Data/mystery_virus_daily_active_counts_RELEASE#2.csv") as f:
     reader = csv.DictReader(f)
     for row in reader:
         days.append(int(row["day"]))
@@ -96,7 +96,7 @@ import matplotlib.pyplot as plt
 # ---------------------------
 # Load Data Release #2
 # ---------------------------
-data2 = pd.read_csv("C:\\Users\\15712\\OneDrive - University of Virginia\\Comp Mod 2\\Module-2-Epidemics-SIR-Modeling\\Data\\mystery_virus_daily_active_counts_RELEASE#2.csv")
+data2 = pd.read_csv("/Users/tomas/Desktop/CompBME/Module-2-Epidemics-SIR-Modeling/Data/mystery_virus_daily_active_counts_RELEASE#2.csv")
 
 # Use the correct columns:
 # day = first column
@@ -357,7 +357,7 @@ plt.show()
 ##################################
 # Data Release #3
 ##################################
-data3 = pd.read_csv("C:\\Users\\15712\\OneDrive - University of Virginia\\Comp Mod 2\\Module-2-Epidemics-SIR-Modeling\\Data\\mystery_virus_daily_active_counts_RELEASE#3.csv")
+data3 = pd.read_csv("/Users/tomas/Desktop/CompBME/Module-2-Epidemics-SIR-Modeling/Data/mystery_virus_daily_active_counts_RELEASE#3.csv")
 
 days_data = pd.to_numeric(data3.iloc[:, 0], errors="coerce")
 infected_data = pd.to_numeric(data3.iloc[:, 2], errors="coerce")
@@ -398,7 +398,8 @@ plt.scatter(days_data, infected_data,
             label="Release #3 Observed Data")
 
 # Plot prediction from Release #2 model
-plt.plot(future_timepoints, new_cases_future, 
+plt.plot(future_timepoints, infected_data, 
+         np.polynomial
          color="red", 
          linewidth=2,
          label="Prediction from Release #2 Model")
@@ -429,7 +430,18 @@ print("Relative error in peak day (x) =", error_x, "%")
 # %%
 #==========================================
 ##Intervention Methods
+
+'''
+Method 1: Wearing a Mask
+ 
+This would decrease the transmission by 40% (beta value falls)
+
+
+Method 2: 
+
+'''
+
 #==========================================
 
-### Masking
+
 
